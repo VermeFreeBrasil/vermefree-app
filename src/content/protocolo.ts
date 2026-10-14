@@ -16,13 +16,17 @@ export type Item = {
 }
 
 /**
- * Doses em ml do cartão de posologia que vai dentro do kit.
- * Enquanto estiverem vazias, o app orienta a seguir o cartão do kit.
- * Preencher com o texto exato do cartão, por exemplo "3 ml".
+ * Doses em ml da bula oficial publicada nas páginas de produto da loja
+ * ("Como tomar"). No Kids a dose é por idade e vale para cada uma das duas tinturas:
+ * 2 a 3 anos 2 ml · 3 a 4 anos 2,5 ml · 4 a 6 anos 3 ml · 6 a 10 anos 4 ml.
+ * Se alguma ficar vazia, o app orienta a seguir o cartão do kit.
  */
 export const DOSES_CARTAO: { tinturaAdulto: string; kids: Record<Faixa, string> } = {
-  tinturaAdulto: "",
-  kids: { "2-4": "", "5-9": "" },
+  tinturaAdulto: "3 ml",
+  kids: {
+    "2-4": "2 ml (2 a 3 anos) ou 2,5 ml (3 a 4 anos)",
+    "5-9": "3 ml (até 6 anos) ou 4 ml (6 a 9 anos)",
+  },
 }
 
 export const MOMENTOS: Record<Momento, string> = {
@@ -46,7 +50,7 @@ function doseTinturaAdulto() {
 
 function doseKids(faixa: Faixa) {
   const d = DOSES_CARTAO.kids[faixa]
-  return d ? `${d} (faixa de ${faixa.replace("-", " a ")} anos)` : `Dose da faixa de ${faixa.replace("-", " a ")} anos, do cartão do kit`
+  return d || `Dose da faixa de ${faixa.replace("-", " a ")} anos, do cartão do kit`
 }
 
 const ADULTO_PREPARO: Item[] = [
@@ -213,6 +217,8 @@ export const PRODUTOS_IMG = {
   kids24: "https://cdn.shopify.com/s/files/1/0827/3267/9387/files/produto-card-2-kids-2a4.png?v=1778684781",
   kids59: "https://cdn.shopify.com/s/files/1/0827/3267/9387/files/produto-card-3-kids-5a9.png?v=1778685564",
   familia: "https://cdn.shopify.com/s/files/1/0827/3267/9387/files/produto-card-4-kit-familia-crop.png?v=1778699873",
+  /** Os 4 frascos do adulto com fundo transparente, a mesma foto da página do produto. */
+  vitrine: "https://cdn.shopify.com/s/files/1/0827/3267/9387/files/vf-pv2-adulto.png?v=1791942375&width=900",
   oleoAlho: "https://cdn.shopify.com/s/files/1/0827/3267/9387/files/01-PRINCIPAL-oleo-alho.png?v=1783873147",
 }
 
@@ -238,4 +244,4 @@ export const PRODUTOS: { nome: string; descricao: string; img: string; url: stri
  * Folga para o kit chegar antes do primeiro dia do ciclo, quando a cliente ainda
  * não recebeu o pedido. Ajustar se o prazo médio de entrega mudar.
  */
-export const DIAS_PARA_O_KIT_CHEGAR = 10
+export const DIAS_PARA_O_KIT_CHEGAR = 7

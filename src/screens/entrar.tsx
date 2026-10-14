@@ -41,14 +41,14 @@ export function EntrarScreen() {
         </div>
 
         <div className="my-auto py-6">
-        <div className="relative mx-auto w-full max-w-[320px] animate-subir">
-          <div aria-hidden className="absolute -inset-4 rounded-[40px] bg-accent/20 blur-3xl" />
+        <div className="relative mx-auto -mb-2 w-full max-w-[380px] animate-subir">
+          <div aria-hidden className="absolute inset-x-6 bottom-6 top-10 rounded-full bg-accent/25 blur-3xl" />
           <img
-            src={PRODUTOS_IMG.familia}
-            alt="Linha VermeFree: protocolo adulto e kids"
-            className="relative aspect-[4/3] w-full rounded-[28px] object-cover shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/15"
-            width={640}
-            height={480}
+            src={PRODUTOS_IMG.vitrine}
+            alt="Protocolo VermeFree: Tintura, Óleo de Orégano, Ornitina e Silimarina"
+            className="relative aspect-[4/3] w-full object-cover object-center drop-shadow-[0_24px_28px_rgba(0,0,0,0.45)]"
+            width={900}
+            height={675}
           />
         </div>
 
