@@ -19,6 +19,7 @@ export type Item = {
  * Doses em ml da bula oficial publicada nas páginas de produto da loja
  * ("Como tomar"). No Kids a dose é por idade e vale para cada uma das duas tinturas:
  * 2 a 3 anos 2 ml · 3 a 4 anos 2,5 ml · 4 a 6 anos 3 ml · 6 a 10 anos 4 ml.
+ * Conferidas com a equipe VermeFree em 14/10/2026.
  * Se alguma ficar vazia, o app orienta a seguir o cartão do kit.
  */
 export const DOSES_CARTAO: { tinturaAdulto: string; kids: Record<Faixa, string> } = {
