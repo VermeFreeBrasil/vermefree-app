@@ -6,7 +6,6 @@ import { GlowBackground } from "@/components/ui/glow-background"
 import { AppLayout, Logo } from "@/components/layout"
 import { EntrarScreen } from "@/screens/entrar"
 import { CadastroScreen } from "@/screens/cadastro"
-import { InstalarScreen } from "@/screens/instalar"
 import { HojeScreen } from "@/screens/hoje"
 import { CronogramaScreen } from "@/screens/cronograma"
 import { GuiaScreen } from "@/screens/guia"
@@ -60,7 +59,7 @@ export default function App() {
             <Route path="/cadastro" element={<SoSemPerfis />} />
           </Route>
           <Route element={<Guardas precisaPerfis />}>
-            <Route path="/instalar" element={<InstalarScreen />} />
+            <Route path="/instalar" element={<Navigate to="/hoje?instalar=1" replace />} />
             <Route path="/fim/:runId" element={<FimCicloScreen />} />
             <Route element={<AppLayout />}>
               <Route path="/hoje" element={<HojeScreen />} />

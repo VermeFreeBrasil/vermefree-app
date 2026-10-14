@@ -1,19 +1,29 @@
 import { NavLink, Outlet } from "react-router-dom"
-import { BookOpen, CalendarDays, CircleHelp, Leaf, Sun } from "lucide-react"
+import { BookOpen, CalendarDays, CircleHelp, Sun } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { GlowBackground } from "@/components/ui/glow-background"
+import { MARCA_CAIXA, MARCA_PATH } from "@/content/marca"
 
-/** Marca provisória até recebermos o arquivo do logo oficial. */
+/** Símbolo da marca (a onda verde da VermeFree), o mesmo do ícone na tela inicial. */
+export function Simbolo({ className }: { className?: string }) {
+  const { x, y, largura, altura } = MARCA_CAIXA
+  return (
+    <svg viewBox={`${x} ${y} ${largura} ${altura}`} className={className} aria-hidden fill="currentColor">
+      <path d={MARCA_PATH} />
+    </svg>
+  )
+}
+
 export function Logo({ tone = "dark", className }: { tone?: "dark" | "light"; className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 font-display text-[22px] leading-none",
+        "inline-flex items-center gap-2 font-display text-[22px] leading-none",
         tone === "light" ? "text-white" : "text-primary",
         className,
       )}
     >
-      <Leaf className={cn("size-5", tone === "light" ? "text-accent" : "text-leaf")} aria-hidden />
+      <Simbolo className={cn("h-[11px] w-auto", tone === "light" ? "text-accent" : "text-leaf")} />
       VermeFree
     </span>
   )

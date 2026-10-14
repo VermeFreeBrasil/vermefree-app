@@ -240,7 +240,7 @@ export function CadastroScreen() {
     setErro(null)
     try {
       await salvarPerfis(linhas.map(paraPerfil), lua)
-      navigate("/instalar", { replace: true })
+      navigate("/hoje?instalar=1", { replace: true })
     } catch {
       setErro("Não foi possível salvar agora. Confira a internet e tente de novo.")
       setSalvando(false)

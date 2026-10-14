@@ -2,7 +2,7 @@
 // Páginas: rede primeiro, com a última versão em cache para abrir sem internet.
 // Arquivos com hash (/assets/) e ícones: cache primeiro.
 // A API (Supabase) nunca passa por cache.
-const CACHE = "vf-app-v1"
+const CACHE = "vf-app-v2"
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/manifest.webmanifest"])).then(() => self.skipWaiting()))

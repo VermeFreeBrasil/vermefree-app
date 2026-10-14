@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { AlertTriangle, BookOpen, CalendarPlus, Check, ChevronRight, Info, Lightbulb, Loader2, Moon, Package, PackageCheck, PartyPopper, ShoppingBag, Truck, Users } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { GlowBackground } from "@/components/ui/glow-background"
@@ -21,7 +21,8 @@ import {
 import { cn } from "@/lib/utils"
 import { DICAS, FASE_INFO, LINKS, PRODUTOS_IMG, REACOES_LEVES } from "@/content/protocolo"
 import { secaoDaFase } from "@/content/guia"
-import { estaInstalado } from "@/screens/instalar"
+import { estaInstalado, plataforma, tutorialJaVisto } from "@/lib/instalar"
+import { TutorialInstalar } from "@/components/tutorial-instalar"
 import { chaveDoPedido, envioPrincipal, mostrarNoHoje, pedidoRecente, TEXTO_SITUACAO, type Chave } from "@/lib/pedido"
 import type { AppState, Profile } from "@/lib/api"
 
@@ -57,6 +58,7 @@ export function HojeScreen() {
     const run = cicloAtual(p, s.runs)
     return run && situacao(p, run, s.hoje).fase === "aguardando"
   })
+  const tutorial = useTutorialInstalar()
 
   return (
     <>
@@ -73,8 +75,36 @@ export function HojeScreen() {
       <PerfilChips perfis={s.profiles} atual={selecionado} onChange={trocar} comTodos />
       {selecionado === TODOS || !perfil ? <FamiliaHoje onEscolher={trocar} /> : <PerfilHoje key={perfil.id} perfil={perfil} />}
       {algumAguardando && <Preparacao s={s} />}
+      <TutorialInstalar aberto={tutorial.aberto} onFechar={tutorial.fechar} />
     </>
   )
+}
+
+/** Pop-up "colocar na tela inicial": abre com ?instalar=1 ou sozinho na primeira visita. */
+function useTutorialInstalar() {
+  const [params, setParams] = useSearchParams()
+  const [aberto, setAberto] = React.useState(false)
+  const pedido = params.get("instalar") === "1"
+
+  React.useEffect(() => {
+    if (estaInstalado()) return
+    if (pedido) {
+      setAberto(true)
+      setParams(
+        (p) => {
+          p.delete("instalar")
+          return p
+        },
+        { replace: true },
+      )
+      return
+    }
+    if (tutorialJaVisto() || plataforma() === "outro") return
+    const t = setTimeout(() => setAberto(true), 1200)
+    return () => clearTimeout(t)
+  }, [pedido, setParams])
+
+  return { aberto, fechar: () => setAberto(false) }
 }
 
 /* ---------- Entrega do kit (rastreio da Shopify) ---------- */
@@ -485,7 +515,7 @@ function Preparacao({ s }: { s: AppState }) {
       detalhe: temAdulto && temKids ? "E a parte das crianças, logo depois." : "Leva 3 minutos.",
       to: temAdulto ? "/guia?secao=fases" : "/guia?secao=criancas",
     },
-    ...(instalado ? [] : [{ id: "instalar", texto: "Colocar o app na tela inicial", detalhe: "Abre com um toque, como um aplicativo.", to: "/instalar" }]),
+    ...(instalado ? [] : [{ id: "instalar", texto: "Colocar o app na tela inicial", detalhe: "Abre com um toque, como um aplicativo.", to: "/hoje?instalar=1" }]),
   ]
   const total = passos.length
   const prontos = passos.filter((p) => feitos.has(p.id)).length

@@ -10,11 +10,13 @@ import { cn } from "@/lib/utils"
 import { FAQ } from "@/content/faq"
 import { GUIA_PDF } from "@/content/guia"
 import { LINKS, PRODUTOS } from "@/content/protocolo"
-import { estaInstalado } from "@/screens/instalar"
+import { estaInstalado } from "@/lib/instalar"
+import { TutorialInstalar } from "@/components/tutorial-instalar"
 
 export function AjudaScreen() {
   const { state, logout } = useApp()
   const [aberta, setAberta] = React.useState<number | null>(null)
+  const [tutorial, setTutorial] = React.useState(false)
 
   const atalhos = [
     { to: "/pedido", icone: Truck, titulo: "Meu pedido", texto: "Rastreio da entrega" },
@@ -110,10 +112,8 @@ export function AjudaScreen() {
         </section>
 
         {!estaInstalado() && (
-          <Button asChild variant="outline" className="w-full">
-            <Link to="/instalar">
-              <SquarePlus aria-hidden /> Colocar o app na tela inicial
-            </Link>
+          <Button variant="outline" className="w-full" onClick={() => setTutorial(true)}>
+            <SquarePlus aria-hidden /> Colocar o app na tela inicial
           </Button>
         )}
 
@@ -124,6 +124,7 @@ export function AjudaScreen() {
           </Button>
         </div>
       </div>
+      <TutorialInstalar aberto={tutorial} onFechar={() => setTutorial(false)} />
     </>
   )
 }

@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && npm run pdf && vite build",
+    "build": "tsc -b && npm run pdf && npm run icones && vite build",
     "pdf": "tsx scripts/guia-pdf.tsx",
     "preview": "vite preview",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "icones": "tsx scripts/icones.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "1.5.0",
@@ -29,6 +30,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "5.2.0",
+    "sharp": "^0.34.4",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
