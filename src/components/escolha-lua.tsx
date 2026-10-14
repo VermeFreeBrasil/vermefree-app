@@ -20,6 +20,7 @@ export function EscolhaLua({
   onChange,
   tom = "escuro",
   permitirPassadas = true,
+  kitEntregue = false,
 }: {
   temAdulto: boolean
   temKids: boolean
@@ -28,8 +29,13 @@ export function EscolhaLua({
   onChange: (lua: string | null) => void
   tom?: Tom
   permitirPassadas?: boolean
+  /** Entrega confirmada pelos Correios: já começa em "Já chegou". */
+  kitEntregue?: boolean
 }) {
-  const [kitChegou, setKitChegou] = React.useState(false)
+  const [kitChegou, setKitChegou] = React.useState(kitEntregue)
+  React.useEffect(() => {
+    if (kitEntregue) setKitChegou(true)
+  }, [kitEntregue])
   const [jaComecei, setJaComecei] = React.useState(false)
   const { luas, recomendada } = React.useMemo(() => opcoesDeLua(temAdulto, hoje, kitChegou), [temAdulto, hoje, kitChegou])
   const passadas = React.useMemo(

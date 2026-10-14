@@ -37,6 +37,28 @@ export type AppState = {
   hoje: string
 }
 
+export type Rastreio = { empresa: string | null; codigo: string; url: string | null }
+
+export type Envio = {
+  /** displayStatus da Shopify: IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED, ATTEMPTED_DELIVERY... */
+  status: string | null
+  enviado_em: string
+  em_transito_em: string | null
+  entregue_em: string | null
+  previsao: string | null
+  rastreio: Rastreio[]
+}
+
+export type Pedido = {
+  numero: string
+  criado_em: string
+  pagamento: string
+  /** displayFulfillmentStatus: UNFULFILLED, FULFILLED, PARTIALLY_FULFILLED... */
+  envio: string
+  itens: { titulo: string; quantidade: number }[]
+  envios: Envio[]
+}
+
 export class ApiError extends Error {
   constructor(
     public code: string,

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { api, ApiError, tokenStore, type AppState } from "@/lib/api"
+import { api, ApiError, tokenStore, type AppState, type Pedido } from "@/lib/api"
 import type { Faixa, Tipo } from "@/content/protocolo"
 
 type NovoPerfil = { tipo: Tipo; nome: string; faixa_etaria: Faixa | null }
@@ -16,6 +16,9 @@ type Ctx = {
   editarPerfil: (profileId: string, patch: { nome?: string; faixa_etaria?: Faixa }) => Promise<void>
   marcar: (runId: string, date: string, itemKey: string, done: boolean) => Promise<void>
   fecharCiclo: (runId: string, transformacao: string, relato: string) => Promise<void>
+  /** Pedidos da Shopify com o rastreio. null = ainda não carregou; "erro" = não deu para buscar. */
+  pedidos: Pedido[] | null | "erro"
+  carregarPedidos: (forcar?: boolean) => Promise<void>
 }
 
 const AppContext = React.createContext<Ctx | null>(null)
@@ -24,12 +27,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = React.useState<string | null>(() => tokenStore.get())
   const [state, setState] = React.useState<AppState | null>(null)
   const [carregando, setCarregando] = React.useState<boolean>(() => Boolean(tokenStore.get()))
+  const [pedidos, setPedidos] = React.useState<Pedido[] | null | "erro">(null)
+  const buscandoPedidos = React.useRef(false)
 
   const logout = React.useCallback(() => {
     tokenStore.clear()
     setToken(null)
     setState(null)
+    setPedidos(null)
   }, [])
+
+  // Rastreio vem da Shopify a cada abertura (não fica guardado no banco).
+  const carregarPedidos = React.useCallback(
+    async (forcar = false) => {
+      if (!token || buscandoPedidos.current || (pedidos && pedidos !== "erro" && !forcar)) return
+      buscandoPedidos.current = true
+      try {
+        const r = await api<{ pedidos: Pedido[] }>("orders", { access_token: token })
+        setPedidos(r.pedidos)
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 401) logout()
+        else setPedidos("erro")
+      } finally {
+        buscandoPedidos.current = false
+      }
+    },
+    [token, pedidos, logout],
+  )
 
   // Sessão salva: recarrega o estado ao abrir o app.
   React.useEffect(() => {
@@ -63,6 +87,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     state,
     carregando,
     logout,
+    pedidos,
+    carregarPedidos,
     async login(email) {
       const r = await api<{ access_token: string; state: AppState }>("login", { email })
       tokenStore.set(r.access_token)

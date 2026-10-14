@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { BookOpen, CalendarPlus, Check, ChevronRight, Info, Lightbulb, Loader2, Moon, PartyPopper, ShoppingBag, Users } from "lucide-react"
+import { AlertTriangle, BookOpen, CalendarPlus, Check, ChevronRight, Info, Lightbulb, Loader2, Moon, Package, PackageCheck, PartyPopper, ShoppingBag, Truck, Users } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { GlowBackground } from "@/components/ui/glow-background"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils"
 import { DICAS, FASE_INFO, LINKS, PRODUTOS_IMG, REACOES_LEVES } from "@/content/protocolo"
 import { secaoDaFase } from "@/content/guia"
 import { estaInstalado } from "@/screens/instalar"
+import { chaveDoPedido, envioPrincipal, mostrarNoHoje, pedidoRecente, TEXTO_SITUACAO, type Chave } from "@/lib/pedido"
 import type { AppState, Profile } from "@/lib/api"
 
 function useMarcar() {
@@ -68,10 +69,56 @@ export function HojeScreen() {
           </Link>
         }
       />
+      <CartaoEntrega />
       <PerfilChips perfis={s.profiles} atual={selecionado} onChange={trocar} comTodos />
       {selecionado === TODOS || !perfil ? <FamiliaHoje onEscolher={trocar} /> : <PerfilHoje key={perfil.id} perfil={perfil} />}
       {algumAguardando && <Preparacao s={s} />}
     </>
+  )
+}
+
+/* ---------- Entrega do kit (rastreio da Shopify) ---------- */
+
+const ICONE_ENTREGA: Record<Chave, typeof Truck> = {
+  preparando: Package,
+  enviado: Truck,
+  transito: Truck,
+  saiu: Truck,
+  entregue: PackageCheck,
+  problema: AlertTriangle,
+}
+
+function CartaoEntrega() {
+  const { state, pedidos, carregarPedidos } = useApp()
+  React.useEffect(() => {
+    carregarPedidos()
+  }, [carregarPedidos])
+  const pedido = pedidoRecente(pedidos)
+  if (!pedido || !mostrarNoHoje(pedido, state!.hoje)) return null
+  const chave = chaveDoPedido(pedido)
+  const codigo = envioPrincipal(pedido)?.rastreio[0]?.codigo
+  const Icone = ICONE_ENTREGA[chave]
+  return (
+    <Link
+      to="/pedido"
+      className={cn(
+        "mb-4 flex items-center gap-3 rounded-panel border p-4 animate-subir",
+        chave === "problema" ? "border-[#e8c3b8] bg-[#f6e3dd]" : chave === "entregue" ? "border-selected-border/20 bg-selected" : "border-border bg-card",
+      )}
+    >
+      <span className={cn("grid size-11 shrink-0 place-items-center rounded-full", chave === "entregue" ? "bg-primary text-accent" : "bg-selected text-leaf")}>
+        <Icone className="size-5" aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-bold text-primary">{TEXTO_SITUACAO[chave].titulo}</span>
+        <span className="block truncate text-[13px] text-muted-foreground">
+          Pedido {pedido.numero}
+          {codigo ? ` · ${codigo}` : ""}
+        </span>
+      </span>
+      <span className="shrink-0 text-[13px] font-semibold text-leaf">Rastrear</span>
+      <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+    </Link>
   )
 }
 
@@ -414,13 +461,22 @@ export function marcarPreparacao(email: string, id: string) {
 }
 
 function Preparacao({ s }: { s: AppState }) {
-  const { feitos, alternar } = usePreparacao(s.customer.email)
+  const { feitos: marcados, alternar } = usePreparacao(s.customer.email)
+  const { pedidos } = useApp()
+  const recente = pedidoRecente(pedidos)
+  const kitEntregue = recente ? chaveDoPedido(recente) === "entregue" : false
+  const feitos = kitEntregue ? new Set([...marcados, "kit"]) : marcados
   const temAdulto = s.profiles.some((p) => p.tipo === "adulto")
   const temKids = s.profiles.some((p) => p.tipo === "kids")
   const instalado = estaInstalado()
 
   const passos = [
-    { id: "kit", texto: "Meu kit chegou", detalhe: "Se o kit atrasar, dá para mudar a data em Pessoas e datas.", to: "/pessoas" },
+    {
+      id: "kit",
+      texto: "Meu kit chegou",
+      detalhe: kitEntregue ? "Os Correios confirmaram a entrega." : "Acompanhe a entrega. Se atrasar, dá para mudar a data.",
+      to: "/pedido",
+    },
     { id: "lembretes", texto: "Colocar lembretes na agenda do celular", detalhe: "Um aviso na hora de cada dose.", to: "/lembretes" },
     { id: "compras", texto: "Separar a lista de compras", detalhe: "Temperos, frutas e fibras do Guia.", to: "/guia?secao=compras" },
     {

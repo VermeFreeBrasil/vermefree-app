@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { BellRing, ChevronDown, ChevronRight, ExternalLink, FileDown, LogOut, MessageCircle, SquarePlus, Users } from "lucide-react"
+import { BellRing, ChevronDown, ChevronRight, ExternalLink, FileDown, LogOut, MessageCircle, SquarePlus, Truck, Users } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { GlowBackground } from "@/components/ui/glow-background"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
@@ -17,6 +17,7 @@ export function AjudaScreen() {
   const [aberta, setAberta] = React.useState<number | null>(null)
 
   const atalhos = [
+    { to: "/pedido", icone: Truck, titulo: "Meu pedido", texto: "Rastreio da entrega" },
     { to: "/lembretes", icone: BellRing, titulo: "Lembretes das doses", texto: "Avisos na agenda do celular" },
     { to: "/pessoas", icone: Users, titulo: "Pessoas e datas", texto: "Nomes, idades e a lua do ciclo" },
   ]

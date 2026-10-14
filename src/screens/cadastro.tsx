@@ -7,6 +7,7 @@ import { Logo } from "@/components/layout"
 import { Avatar } from "@/components/protocolo"
 import { EscolhaLua } from "@/components/escolha-lua"
 import { useApp } from "@/lib/app-state"
+import { chaveDoPedido, pedidoRecente } from "@/lib/pedido"
 import { firstName } from "@/lib/dates"
 import type { Produtos } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -201,8 +202,13 @@ export function Cuidados({ temAdulto, temKids, tom = "escuro" }: { temAdulto: bo
 }
 
 export function CadastroScreen() {
-  const { state, salvarPerfis } = useApp()
+  const { state, salvarPerfis, pedidos, carregarPedidos } = useApp()
   const navigate = useNavigate()
+  React.useEffect(() => {
+    carregarPedidos()
+  }, [carregarPedidos])
+  const recente = pedidoRecente(pedidos)
+  const kitEntregue = recente ? chaveDoPedido(recente) === "entregue" : false
   const hoje = state!.hoje
   const [passo, setPasso] = React.useState(0)
   const [linhas, setLinhas] = React.useState<Linha[]>(() => sugerirPerfis(state!.customer.produtos, firstName(state!.customer.nome)))
@@ -321,7 +327,7 @@ export function CadastroScreen() {
             </p>
 
             <div className="mt-5">
-              <EscolhaLua temAdulto={temAdulto} temKids={temKids} hoje={hoje} valor={lua} onChange={setLua} />
+              <EscolhaLua temAdulto={temAdulto} temKids={temKids} hoje={hoje} valor={lua} onChange={setLua} kitEntregue={kitEntregue} />
             </div>
 
             <Rodape>

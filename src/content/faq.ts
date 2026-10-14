@@ -5,7 +5,7 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "Meu pedido ainda não chegou. E agora?",
     resposta:
-      "O código de rastreio vai para o seu e-mail quando o pedido é enviado. Se não encontrar ou se a entrega atrasar, fale com a gente pelo WhatsApp com o número do pedido. E se o kit não chegar a tempo, dá para mudar a data do ciclo em Hoje › Pessoas e datas.",
+      "Acompanhe a entrega em Ajuda › Meu pedido: o código de rastreio dos Correios aparece lá assim que o pedido é enviado. Se a entrega atrasar, fale com a gente pelo WhatsApp com o número do pedido. E se o kit não chegar a tempo, dá para mudar a data do ciclo em Hoje › Pessoas e datas.",
   },
   {
     pergunta: "Pode dar alguma reação?",

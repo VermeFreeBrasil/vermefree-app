@@ -182,6 +182,70 @@ async function assertProfileOwner(supabase: Supabase, profileId: string, custome
   return data && data.customer_id === customerId ? data : null;
 }
 
+// --- Pedidos e rastreio (Shopify) -----------------------------------------
+// Credenciais da loja ficam em app_config (as mesmas usadas pelas outras integrações).
+async function shopifyConfig(supabase: Supabase) {
+  const { data, error } = await supabase
+    .from("app_config")
+    .select("key, value")
+    .in("key", ["shopify_shop_domain", "shopify_api_version", "shopify_access_token"]);
+  if (error) throw error;
+  const c = Object.fromEntries((data || []).map((r) => [r.key, String(r.value ?? "")]));
+  if (!c.shopify_shop_domain || !c.shopify_access_token) return null;
+  return { dominio: c.shopify_shop_domain, versao: c.shopify_api_version || "2025-07", token: c.shopify_access_token };
+}
+
+const PEDIDOS_QUERY = `query($q: String!) {
+  orders(first: 5, sortKey: CREATED_AT, reverse: true, query: $q) {
+    nodes {
+      name email createdAt cancelledAt displayFinancialStatus displayFulfillmentStatus
+      lineItems(first: 10) { nodes { title quantity } }
+      fulfillments(first: 5) {
+        displayStatus createdAt inTransitAt deliveredAt estimatedDeliveryAt
+        trackingInfo(first: 3) { company number url }
+      }
+    }
+  }
+}`;
+
+// Só o que a tela precisa: nada de endereço, telefone ou valores.
+async function pedidosDaCliente(supabase: Supabase, email: string) {
+  const cfg = await shopifyConfig(supabase);
+  if (!cfg) return null;
+  const res = await fetch(`https://${cfg.dominio}/admin/api/${cfg.versao}/graphql.json`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": cfg.token },
+    body: JSON.stringify({ query: PEDIDOS_QUERY, variables: { q: `email:"${email.replace(/"/g, "")}"` } }),
+  });
+  if (!res.ok) throw new Error(`shopify_${res.status}`);
+  const json = await res.json();
+  if (json.errors) throw new Error(`shopify_graphql: ${JSON.stringify(json.errors).slice(0, 300)}`);
+  type No = {
+    name: string; email: string | null; createdAt: string; cancelledAt: string | null;
+    displayFinancialStatus: string; displayFulfillmentStatus: string;
+    lineItems: { nodes: { title: string; quantity: number }[] };
+    fulfillments: { displayStatus: string | null; createdAt: string; inTransitAt: string | null; deliveredAt: string | null; estimatedDeliveryAt: string | null; trackingInfo: { company: string | null; number: string | null; url: string | null }[] }[];
+  };
+  const nodes: No[] = json?.data?.orders?.nodes || [];
+  return nodes
+    .filter((o) => String(o.email || "").trim().toLowerCase() === email && !o.cancelledAt)
+    .map((o) => ({
+      numero: o.name,
+      criado_em: o.createdAt,
+      pagamento: o.displayFinancialStatus,
+      envio: o.displayFulfillmentStatus,
+      itens: o.lineItems.nodes.map((i) => ({ titulo: i.title, quantidade: i.quantity })),
+      envios: o.fulfillments.map((f) => ({
+        status: f.displayStatus,
+        enviado_em: f.createdAt,
+        em_transito_em: f.inTransitAt,
+        entregue_em: f.deliveredAt,
+        previsao: f.estimatedDeliveryAt,
+        rastreio: f.trackingInfo.filter((t) => t.number).map((t) => ({ empresa: t.company, codigo: t.number, url: t.url })),
+      })),
+    }));
+}
+
 function validMoonDate(v: unknown): string | null {
   const s = String(v || "");
   if (!DATE_RE.test(s)) return null;
@@ -253,6 +317,12 @@ Deno.serve(async (req: Request) => {
 
     if (action === "get-state") {
       return json({ state: await loadState(supabase, customer) });
+    }
+
+    if (action === "orders") {
+      const pedidos = await pedidosDaCliente(supabase, String(customer.email));
+      if (!pedidos) return json({ error: "orders_unavailable" }, 503);
+      return json({ pedidos });
     }
 
     if (action === "save-profiles") {
