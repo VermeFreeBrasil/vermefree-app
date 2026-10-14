@@ -40,18 +40,19 @@ export function EntrarScreen() {
           <Logo tone="light" />
         </div>
 
-        <div className="relative mx-auto mt-6 w-full max-w-[300px] animate-subir">
-          <div aria-hidden className="absolute inset-x-6 bottom-2 top-10 rounded-full bg-accent/25 blur-3xl" />
+        <div className="my-auto py-6">
+        <div className="relative mx-auto w-full max-w-[320px] animate-subir">
+          <div aria-hidden className="absolute -inset-4 rounded-[40px] bg-accent/20 blur-3xl" />
           <img
-            src={PRODUTOS_IMG.adulto}
-            alt="Frascos do Protocolo VermeFree Adulto"
-            className="relative mx-auto aspect-square w-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,0.35)]"
-            width={600}
-            height={600}
+            src={PRODUTOS_IMG.familia}
+            alt="Linha VermeFree: protocolo adulto e kids"
+            className="relative aspect-[4/3] w-full rounded-[28px] object-cover shadow-[0_24px_50px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/15"
+            width={640}
+            height={480}
           />
         </div>
 
-        <div className="mt-2 animate-subir [animation-delay:80ms]">
+        <div className="mt-6 animate-subir [animation-delay:80ms]">
           <p className="eyebrow text-accent">App VermeFree</p>
           <h1 className="mt-2 text-[2.5rem] text-white">
             Seu protocolo, <span className="text-accent">um dia de cada vez.</span>
@@ -91,8 +92,9 @@ export function EntrarScreen() {
             {!enviando && <ArrowRight aria-hidden />}
           </LiquidButton>
         </form>
+        </div>
 
-        <div className="mt-auto pt-8 pb-2 text-center">
+        <div className="pb-2 text-center">
           <a
             href={LINKS.atendimento}
             target="_blank"

@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { ChevronDown, LogOut, MessageCircle, ShoppingBag, SquarePlus } from "lucide-react"
+import { BellRing, ChevronDown, ChevronRight, ExternalLink, FileDown, LogOut, MessageCircle, SquarePlus, Users } from "lucide-react"
 import { PageHeader } from "@/components/layout"
 import { GlowBackground } from "@/components/ui/glow-background"
 import { LiquidButton } from "@/components/ui/liquid-glass-button"
@@ -8,12 +8,18 @@ import { Button } from "@/components/ui/button"
 import { useApp } from "@/lib/app-state"
 import { cn } from "@/lib/utils"
 import { FAQ } from "@/content/faq"
-import { LINKS, PRODUTOS_IMG } from "@/content/protocolo"
+import { GUIA_PDF } from "@/content/guia"
+import { LINKS, PRODUTOS } from "@/content/protocolo"
 import { estaInstalado } from "@/screens/instalar"
 
 export function AjudaScreen() {
   const { state, logout } = useApp()
   const [aberta, setAberta] = React.useState<number | null>(null)
+
+  const atalhos = [
+    { to: "/lembretes", icone: BellRing, titulo: "Lembretes das doses", texto: "Avisos na agenda do celular" },
+    { to: "/pessoas", icone: Users, titulo: "Pessoas e datas", texto: "Nomes, idades e a lua do ciclo" },
+  ]
 
   return (
     <>
@@ -31,6 +37,31 @@ export function AjudaScreen() {
             </LiquidButton>
           </div>
         </GlowBackground>
+
+        <nav aria-label="Atalhos" className="overflow-hidden rounded-panel border border-border bg-card">
+          {atalhos.map(({ to, icone: Icone, titulo, texto }) => (
+            <Link key={to} to={to} className="flex min-h-16 items-center gap-3 border-b border-border px-4 py-3 last:border-0">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-selected text-leaf">
+                <Icone className="size-5" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-primary">{titulo}</span>
+                <span className="block text-[13px] text-muted-foreground">{texto}</span>
+              </span>
+              <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+            </Link>
+          ))}
+          <a href={GUIA_PDF} download="Guia de Alimentos VermeFree.pdf" className="flex min-h-16 items-center gap-3 px-4 py-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-selected text-leaf">
+              <FileDown className="size-5" aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-primary">Guia de Alimentos em PDF</span>
+              <span className="block text-[13px] text-muted-foreground">Para salvar ou imprimir</span>
+            </span>
+            <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+          </a>
+        </nav>
 
         <section className="rounded-panel border border-border bg-card p-2" aria-labelledby="t-faq">
           <h2 id="t-faq" className="px-3 pt-3 text-[1.4rem] text-primary">
@@ -57,18 +88,24 @@ export function AjudaScreen() {
           </ul>
         </section>
 
-        <section className="rounded-panel border border-border bg-card p-5">
-          <h2 className="text-[1.4rem] text-primary">Comprar de novo</h2>
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {[PRODUTOS_IMG.adulto, PRODUTOS_IMG.kids24, PRODUTOS_IMG.kids59, PRODUTOS_IMG.oleoAlho].map((src) => (
-              <img key={src} src={src} alt="" className="aspect-square w-full rounded-2xl bg-background object-contain" loading="lazy" />
+        <section className="rounded-panel border border-border bg-card p-5" aria-labelledby="t-loja">
+          <h2 id="t-loja" className="text-[1.4rem] text-primary">
+            Comprar de novo
+          </h2>
+          <ul className="mt-3 space-y-2">
+            {PRODUTOS.map((p) => (
+              <li key={p.nome}>
+                <a href={p.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-card bg-background p-2.5 pr-3">
+                  <img src={p.img} alt="" className="size-16 shrink-0 rounded-2xl bg-white object-cover" loading="lazy" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[15px] font-semibold text-primary">{p.nome}</span>
+                    <span className="block text-[13px] leading-snug text-muted-foreground">{p.descricao}</span>
+                  </span>
+                  <ExternalLink className="size-4 shrink-0 text-muted-foreground" aria-label="Abre no site" />
+                </a>
+              </li>
             ))}
-          </div>
-          <Button asChild variant="dark" className="mt-4 w-full">
-            <a href={LINKS.site} target="_blank" rel="noreferrer">
-              <ShoppingBag aria-hidden /> Ir para a loja
-            </a>
-          </Button>
+          </ul>
         </section>
 
         {!estaInstalado() && (

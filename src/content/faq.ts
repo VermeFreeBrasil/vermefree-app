@@ -1,10 +1,11 @@
 // Respostas do "Documento de Produtos VermeFree" (v1, validação técnica: Pedro Lage).
+// Ordem: o que mais chega no atendimento primeiro (pedido, reações, remédios, segurança, crianças).
 
 export const FAQ: { pergunta: string; resposta: string }[] = [
   {
-    pergunta: "O que eu faço depois do protocolo?",
+    pergunta: "Meu pedido ainda não chegou. E agora?",
     resposta:
-      "É rotina, não é evento único. Dá para repetir até 4 vezes por ano, com no mínimo 3 meses entre um ciclo e outro, sempre começando na lua nova. No intervalo, o Óleo de Alho (1 cápsula por dia) mantém a rotina.",
+      "O código de rastreio vai para o seu e-mail quando o pedido é enviado. Se não encontrar ou se a entrega atrasar, fale com a gente pelo WhatsApp com o número do pedido. E se o kit não chegar a tempo, dá para mudar a data do ciclo em Hoje › Pessoas e datas.",
   },
   {
     pergunta: "Pode dar alguma reação?",
@@ -13,8 +14,7 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   },
   {
     pergunta: "Posso tomar junto com outros remédios?",
-    resposta:
-      "Em geral sim, espaçando 2 horas. Quem usa remédio contínuo fala com o médico antes de começar.",
+    resposta: "Em geral sim, espaçando 2 horas. Quem usa remédio contínuo fala com o médico antes de começar.",
   },
   {
     pergunta: "Grávida ou amamentando pode?",
@@ -33,6 +33,11 @@ export const FAQ: { pergunta: string; resposta: string }[] = [
   {
     pergunta: "Quantos dias dura?",
     resposta: "30 dias, no adulto e no infantil.",
+  },
+  {
+    pergunta: "O que eu faço depois do protocolo?",
+    resposta:
+      "É rotina, não é evento único. Dá para repetir até 4 vezes por ano, com no mínimo 3 meses entre um ciclo e outro, sempre começando na lua nova. No intervalo, o Óleo de Alho (1 cápsula por dia) mantém a rotina.",
   },
   {
     pergunta: "Qual a validade?",

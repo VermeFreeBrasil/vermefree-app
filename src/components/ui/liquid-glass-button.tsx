@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils"
 // - o filtro SVG é renderizado uma única vez (<GlassFilter /> na raiz do app);
 // - <span> no lugar de <div> dentro do botão, para HTML válido.
 const liquidbuttonVariants = cva(
-  "relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold outline-none transition-[transform,color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-[3px] focus-visible:ring-accent [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 [@media(hover:hover)]:hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:scale-100",
+  "group relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold outline-none transition-[transform,color,box-shadow] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.97] disabled:pointer-events-none focus-visible:ring-[3px] focus-visible:ring-accent [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 [@media(hover:hover)]:hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:scale-100",
   {
     variants: {
       tone: {
-        onLight: "text-primary",
-        onDark: "text-white",
-        lime: "text-accent-foreground",
+        onLight: "text-primary disabled:text-primary/40",
+        onDark: "text-white disabled:text-white/45",
+        lime: "text-accent-foreground disabled:text-white/55",
       },
       size: {
         default: "min-h-12 px-6 text-[15px]",
@@ -36,10 +36,11 @@ const sombraClara =
 const sombraEscura =
   "shadow-[0_0_8px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3.5px_rgba(255,255,255,0.09),inset_-3px_-3px_0.5px_-3.5px_rgba(255,255,255,0.85),inset_1px_1px_1px_-0.5px_rgba(255,255,255,0.6),inset_-1px_-1px_1px_-0.5px_rgba(255,255,255,0.6),inset_0_0_6px_6px_rgba(255,255,255,0.12),inset_0_0_2px_2px_rgba(255,255,255,0.06),0_0_12px_rgba(0,0,0,0.15)]"
 
+// Desativado: vira vidro neutro, para ler como "falta preencher" e não como botão quebrado.
 const fundoVidro: Record<NonNullable<VariantProps<typeof liquidbuttonVariants>["tone"]>, string> = {
-  onLight: "bg-white/35",
-  onDark: "bg-white/10",
-  lime: "bg-accent/85",
+  onLight: "bg-white/35 group-disabled:bg-white/20",
+  onDark: "bg-white/10 group-disabled:bg-white/5",
+  lime: "bg-accent/85 group-disabled:bg-white/10",
 }
 
 function LiquidButton({
@@ -60,7 +61,7 @@ function LiquidButton({
     <>
       <span
         aria-hidden
-        className={cn("absolute inset-0 z-0 rounded-full transition-all", t === "onLight" ? sombraClara : sombraEscura)}
+        className={cn("absolute inset-0 z-0 rounded-full transition-all group-disabled:opacity-50", t === "onLight" ? sombraClara : sombraEscura)}
       />
       <span
         aria-hidden

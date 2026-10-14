@@ -1,6 +1,6 @@
 import { addDays, diffDays } from "@/lib/dates"
 import { newMoonsFrom } from "@/lib/moon"
-import { itensDoDia, TOTAL_DIAS, type Fase, type Item } from "@/content/protocolo"
+import { DIAS_PARA_O_KIT_CHEGAR, itensDoDia, TOTAL_DIAS, type Fase, type Item } from "@/content/protocolo"
 import type { Check, Profile, Quiz, Run } from "@/lib/api"
 
 export type Situacao = {
@@ -90,9 +90,23 @@ export function proximaLuaPermitida(run: Run, hoje: string) {
   return newMoonsFrom(base, 1)[0]
 }
 
-/** Luas sugeridas para começar. Com adulto, a primeira cujo preparo ainda não começou. */
-export function luasSugeridas(temAdulto: boolean, hoje: string, n = 3) {
-  const luas = newMoonsFrom(hoje, n + 1)
-  const validas = temAdulto ? luas.filter((l) => addDays(l, -15) >= hoje) : luas
-  return validas.slice(0, n)
+/** Primeiro dia do ciclo para uma lua: com adulto, o preparo começa 15 dias antes. */
+export function inicioPelaLua(lua: string, temAdulto: boolean) {
+  return temAdulto ? addDays(lua, -15) : lua
+}
+
+/**
+ * Luas para escolher. Com adulto, só as que ainda dão tempo de fazer o preparo.
+ * A recomendada é a primeira em que dá tempo do kit chegar (ou a primeira, se o kit já chegou).
+ */
+export function opcoesDeLua(temAdulto: boolean, hoje: string, kitChegou: boolean, n = 3) {
+  const validas = newMoonsFrom(hoje, n + 3).filter((l) => inicioPelaLua(l, temAdulto) >= hoje)
+  const minimo = addDays(hoje, kitChegou ? 0 : DIAS_PARA_O_KIT_CHEGAR)
+  const idx = Math.max(0, validas.findIndex((l) => inicioPelaLua(l, temAdulto) >= minimo))
+  return { luas: validas.slice(idx, idx + n), recomendada: validas[idx] }
+}
+
+/** A data do ciclo só muda enquanto nenhuma dose foi marcada. */
+export function podeMudarLua(run: Run, checks: Check[]) {
+  return !checks.some((c) => c.run_id === run.id && c.done)
 }

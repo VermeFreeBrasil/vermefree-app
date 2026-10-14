@@ -61,10 +61,24 @@ export function AppLayout() {
   )
 }
 
-export function PageHeader({ eyebrow, titulo, children }: { eyebrow?: string; titulo: string; children?: React.ReactNode }) {
+export function PageHeader({
+  eyebrow,
+  titulo,
+  acao,
+  children,
+}: {
+  eyebrow?: string
+  titulo: string
+  /** Botão pequeno no canto direito, na linha do logo. */
+  acao?: React.ReactNode
+  children?: React.ReactNode
+}) {
   return (
     <header className="animate-subir pb-5 pt-4">
-      <Logo className="mb-5" />
+      <div className="mb-5 flex min-h-11 items-center justify-between gap-3">
+        <Logo />
+        {acao}
+      </div>
       {eyebrow && <p className="eyebrow mb-1.5 text-leaf">{eyebrow}</p>}
       <h1 className="text-[2.1rem] text-primary">{titulo}</h1>
       {children}

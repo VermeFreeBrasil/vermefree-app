@@ -297,6 +297,57 @@ Deno.serve(async (req: Request) => {
       return json({ state: await loadState(supabase, customer) });
     }
 
+    if (action === "change-moon") {
+      // Troca a lua de um ciclo que ainda não teve nenhuma dose marcada (kit atrasou, mudou de ideia).
+      const moonDate = validMoonDate(body.moon_date);
+      if (!moonDate) return json({ error: "invalid_moon_date" }, 400);
+      const runId = String(body.run_id || "");
+      const { data: run, error: runErr } = await supabase
+        .from("app_protocol_runs")
+        .select("id, status, app_profiles!inner(customer_id, tipo)")
+        .eq("id", runId)
+        .maybeSingle();
+      if (runErr) throw runErr;
+      const dono = (run as unknown as { app_profiles?: { customer_id: string; tipo: string } } | null)?.app_profiles;
+      if (!run || dono?.customer_id !== customer.id) return json({ error: "forbidden" }, 403);
+      if (run.status === "concluido") return json({ error: "run_closed" }, 409);
+      const { count, error: cntErr } = await supabase
+        .from("app_daily_checks")
+        .select("run_id", { count: "exact", head: true })
+        .eq("run_id", runId)
+        .eq("done", true);
+      if (cntErr) throw cntErr;
+      if (count) return json({ error: "run_started" }, 409);
+      const { error: delErr } = await supabase.from("app_daily_checks").delete().eq("run_id", runId);
+      if (delErr) throw delErr;
+      const { error: updErr } = await supabase
+        .from("app_protocol_runs")
+        .update({ status: "agendado", ...runDates(dono.tipo, moonDate) })
+        .eq("id", runId);
+      if (updErr) throw updErr;
+      return json({ state: await loadState(supabase, customer) });
+    }
+
+    if (action === "update-profile") {
+      const profile = await assertProfileOwner(supabase, String(body.profile_id || ""), customer.id);
+      if (!profile) return json({ error: "forbidden" }, 403);
+      const patch: Record<string, string> = {};
+      if (body.nome !== undefined) {
+        const nome = String(body.nome || "").trim().slice(0, 40);
+        if (!nome) return json({ error: "invalid_profiles" }, 400);
+        patch.nome = nome;
+      }
+      if (body.faixa_etaria !== undefined) {
+        const faixa = String(body.faixa_etaria || "");
+        if (profile.tipo !== "kids" || !FAIXAS.has(faixa)) return json({ error: "invalid_profiles" }, 400);
+        patch.faixa_etaria = faixa;
+      }
+      if (!Object.keys(patch).length) return json({ error: "invalid_profiles" }, 400);
+      const { error } = await supabase.from("app_profiles").update(patch).eq("id", profile.id);
+      if (error) throw error;
+      return json({ state: await loadState(supabase, customer) });
+    }
+
     if (action === "remove-profile") {
       const profile = await assertProfileOwner(supabase, String(body.profile_id || ""), customer.id);
       if (!profile) return json({ error: "forbidden" }, 403);

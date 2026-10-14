@@ -12,6 +12,8 @@ import { CronogramaScreen } from "@/screens/cronograma"
 import { GuiaScreen } from "@/screens/guia"
 import { AjudaScreen } from "@/screens/ajuda"
 import { FimCicloScreen } from "@/screens/fim-ciclo"
+import { PessoasScreen } from "@/screens/pessoas"
+import { LembretesScreen } from "@/screens/lembretes"
 
 function Carregando() {
   return (
@@ -64,6 +66,8 @@ export default function App() {
               <Route path="/cronograma" element={<CronogramaScreen />} />
               <Route path="/guia" element={<GuiaScreen />} />
               <Route path="/ajuda" element={<AjudaScreen />} />
+              <Route path="/pessoas" element={<PessoasScreen />} />
+              <Route path="/lembretes" element={<LembretesScreen />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/hoje" replace />} />

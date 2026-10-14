@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && npm run pdf && vite build",
+    "pdf": "tsx scripts/guia-pdf.tsx",
     "preview": "vite preview",
     "typecheck": "tsc -b"
   },
@@ -20,12 +21,16 @@
     "tailwind-merge": "3.7.0"
   },
   "devDependencies": {
+    "@fontsource/caprasimo": "5.3.0",
+    "@fontsource/inter": "5.3.0",
+    "@react-pdf/renderer": "4.9.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "5.2.0",
     "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vite": "7.3.7"
   },

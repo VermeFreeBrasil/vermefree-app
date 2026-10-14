@@ -39,21 +39,24 @@ export function Progresso({ valor, total, claro = false }: { valor: number; tota
   )
 }
 
+/** Uma linha do checklist: o item do protocolo e, na visão da família, de quem é. */
+export type Linha = { id: string; item: Item; pessoa?: string }
+
 export function Checklist({
-  itens,
+  linhas,
   feito,
   onToggle,
 }: {
-  itens: Item[]
-  feito: (item: Item) => boolean
-  onToggle: (item: Item, done: boolean) => void
+  linhas: Linha[]
+  feito: (linha: Linha) => boolean
+  onToggle: (linha: Linha, done: boolean) => void
 }) {
   const grupos = React.useMemo(() => {
     const ordem: Momento[] = ["manha", "almoco", "noite", "dia"]
     return ordem
-      .map((m) => ({ momento: m, itens: itens.filter((i) => i.momento === m) }))
-      .filter((g) => g.itens.length)
-  }, [itens])
+      .map((m) => ({ momento: m, linhas: linhas.filter((l) => l.item.momento === m) }))
+      .filter((g) => g.linhas.length)
+  }, [linhas])
 
   return (
     <div className="space-y-4">
@@ -61,15 +64,16 @@ export function Checklist({
         <div key={g.momento}>
           <h3 className="eyebrow mb-2 font-sans text-muted-foreground">{MOMENTOS[g.momento]}</h3>
           <ul className="space-y-2">
-            {g.itens.map((item) => {
-              const ok = feito(item)
+            {g.linhas.map((linha) => {
+              const ok = feito(linha)
+              const { item } = linha
               return (
-                <li key={item.key}>
+                <li key={linha.id}>
                   <button
                     type="button"
                     role="checkbox"
                     aria-checked={ok}
-                    onClick={() => onToggle(item, !ok)}
+                    onClick={() => onToggle(linha, !ok)}
                     className={cn(
                       "flex w-full items-start gap-3 rounded-card border p-3.5 text-left transition-colors duration-200",
                       ok ? "border-selected-border/30 bg-selected" : "border-border bg-card",
@@ -83,7 +87,12 @@ export function Checklist({
                     >
                       {ok && <Check className="size-4" strokeWidth={3} aria-hidden />}
                     </span>
-                    <span className="min-w-0">
+                    <span className="min-w-0 flex-1">
+                      {linha.pessoa && (
+                        <span className="mb-1 inline-block rounded-full bg-secondary px-2 py-0.5 text-[11.5px] font-bold text-primary">
+                          {linha.pessoa}
+                        </span>
+                      )}
                       <span className={cn("block text-[15px] font-bold leading-tight", ok ? "text-primary/70 line-through decoration-primary/30" : "text-primary")}>
                         {item.titulo}
                       </span>
@@ -101,19 +110,41 @@ export function Checklist({
   )
 }
 
+/** Inicial do nome num círculo, para identificar cada pessoa sem depender de foto. */
+export function Avatar({ nome, tom = "claro", className }: { nome: string; tom?: "claro" | "escuro"; className?: string }) {
+  const inicial = (nome.trim()[0] || "?").toUpperCase()
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "grid size-11 shrink-0 place-items-center rounded-full font-display text-[1.15rem] leading-none",
+        tom === "escuro" ? "bg-accent text-accent-foreground" : "bg-selected text-primary",
+        className,
+      )}
+    >
+      {inicial}
+    </span>
+  )
+}
+
+export const TODOS = "todos"
+
 export function PerfilChips({
   perfis,
   atual,
   onChange,
+  comTodos = false,
 }: {
   perfis: Profile[]
   atual: string
   onChange: (id: string) => void
+  comTodos?: boolean
 }) {
   if (perfis.length < 2) return null
+  const opcoes = [...(comTodos ? [{ id: TODOS, nome: "Todos" }] : []), ...perfis.map((p) => ({ id: p.id, nome: p.nome }))]
   return (
-    <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]" role="tablist" aria-label="Pessoa">
-      {perfis.map((p) => (
+    <div className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none]" role="tablist" aria-label="Pessoa">
+      {opcoes.map((p) => (
         <button
           key={p.id}
           type="button"
@@ -121,8 +152,8 @@ export function PerfilChips({
           aria-selected={p.id === atual}
           onClick={() => onChange(p.id)}
           className={cn(
-            "min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors",
-            p.id === atual ? "bg-primary text-white" : "glass text-primary",
+            "min-h-11 shrink-0 rounded-full border px-4 text-sm font-semibold transition-colors",
+            p.id === atual ? "border-primary bg-primary text-white" : "border-border bg-card text-primary",
           )}
         >
           {p.nome}
@@ -132,8 +163,11 @@ export function PerfilChips({
   )
 }
 
-/** Pessoa selecionada nas abas Hoje e Cronograma (lembrada entre as abas). */
-export function usePerfilAtual(perfis: Profile[]) {
+/**
+ * Pessoa selecionada nas abas Hoje e Cronograma (lembrada entre as abas).
+ * Com `comTodos`, a família começa vendo todo mundo junto.
+ */
+export function usePerfilAtual(perfis: Profile[], comTodos = false) {
   const [id, setId] = React.useState<string>(() => {
     try {
       return sessionStorage.getItem("vf_perfil") || ""
@@ -141,7 +175,8 @@ export function usePerfilAtual(perfis: Profile[]) {
       return ""
     }
   })
-  const atual = perfis.find((p) => p.id === id) ?? perfis[0]
+  const todos = comTodos && perfis.length > 1 && (id === TODOS || !id)
+  const perfil = perfis.find((p) => p.id === id) ?? perfis[0]
   const trocar = (novo: string) => {
     setId(novo)
     try {
@@ -150,5 +185,5 @@ export function usePerfilAtual(perfis: Profile[]) {
       /* sem armazenamento: segue só na memória */
     }
   }
-  return [atual, trocar] as const
+  return { selecionado: todos ? TODOS : perfil.id, perfil: todos ? null : perfil, trocar }
 }

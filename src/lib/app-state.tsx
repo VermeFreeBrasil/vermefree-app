@@ -12,6 +12,8 @@ type Ctx = {
   salvarPerfis: (perfis: NovoPerfil[], moonDate: string) => Promise<void>
   novoCiclo: (profileId: string, moonDate: string) => Promise<void>
   removerPerfil: (profileId: string) => Promise<void>
+  mudarLua: (runId: string, moonDate: string) => Promise<void>
+  editarPerfil: (profileId: string, patch: { nome?: string; faixa_etaria?: Faixa }) => Promise<void>
   marcar: (runId: string, date: string, itemKey: string, done: boolean) => Promise<void>
   fecharCiclo: (runId: string, transformacao: string, relato: string) => Promise<void>
 }
@@ -70,6 +72,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     salvarPerfis: (perfis, moonDate) => comToken("save-profiles", { profiles: perfis, moon_date: moonDate }),
     novoCiclo: (profileId, moonDate) => comToken("new-run", { profile_id: profileId, moon_date: moonDate }),
     removerPerfil: (profileId) => comToken("remove-profile", { profile_id: profileId }),
+    mudarLua: (runId, moonDate) => comToken("change-moon", { run_id: runId, moon_date: moonDate }),
+    editarPerfil: (profileId, patch) => comToken("update-profile", { profile_id: profileId, ...patch }),
     fecharCiclo: (runId, transformacao, relato) =>
       comToken("complete-run", { run_id: runId, transformacao, relato: relato || undefined }),
     async marcar(runId, date, itemKey, done) {

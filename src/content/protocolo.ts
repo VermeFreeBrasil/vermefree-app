@@ -216,8 +216,26 @@ export const PRODUTOS_IMG = {
   oleoAlho: "https://cdn.shopify.com/s/files/1/0827/3267/9387/files/01-PRINCIPAL-oleo-alho.png?v=1783873147",
 }
 
+const UTM = "utm_source=app&utm_medium=app&utm_campaign=app_vermefree"
+const produto = (handle: string) => `https://vermefree.com.br/products/${handle}?${UTM}`
+
 export const LINKS = {
-  site: "https://vermefree.com.br/?utm_source=app&utm_medium=app&utm_campaign=app_vermefree",
-  oleoAlho: "https://vermefree.com.br/products/oleo-de-alho-desodorizado-500mg?utm_source=app&utm_medium=app&utm_campaign=app_vermefree",
+  site: `https://vermefree.com.br/?${UTM}`,
+  oleoAlho: produto("oleo-de-alho-desodorizado-500mg"),
   atendimento: "https://l.vermefree.com.br/atendimento",
 }
+
+/** Vitrine de recompra (títulos e descrições das páginas de produto da Shopify). */
+export const PRODUTOS: { nome: string; descricao: string; img: string; url: string }[] = [
+  { nome: "VermeFree Adulto", descricao: "Protocolo de 30 dias com 4 ativos naturais. A partir de 10 anos.", img: PRODUTOS_IMG.adulto, url: produto("protocolo-desparasitacao-adulto-vermefree") },
+  { nome: "VermeFree Kids 2 a 4 anos", descricao: "Dosagem adaptada para crianças de 2 a 4 anos.", img: PRODUTOS_IMG.kids24, url: produto("antiparasitario-infantil-natural-vermefree-kids-2-a-4-anos") },
+  { nome: "VermeFree Kids 5 a 9 anos", descricao: "Dosagem adaptada para crianças de 5 a 9 anos.", img: PRODUTOS_IMG.kids59, url: produto("antiparasitario-infantil-natural-vermefree-kids-5-a-9-anos") },
+  { nome: "Kit Família", descricao: "2 adultos e 2 crianças no mesmo ciclo.", img: PRODUTOS_IMG.familia, url: produto("kit-familia-vermefree-2-adultos-2-criancas") },
+  { nome: "Óleo de Alho 500 mg", descricao: "Manutenção mensal: 1 cápsula por dia entre um ciclo e outro.", img: PRODUTOS_IMG.oleoAlho, url: LINKS.oleoAlho },
+]
+
+/**
+ * Folga para o kit chegar antes do primeiro dia do ciclo, quando a cliente ainda
+ * não recebeu o pedido. Ajustar se o prazo médio de entrega mudar.
+ */
+export const DIAS_PARA_O_KIT_CHEGAR = 10
