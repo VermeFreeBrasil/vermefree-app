@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom"
+import * as React from "react"
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom"
 import { Loader2 } from "lucide-react"
 import { AppProvider, useApp } from "@/lib/app-state"
 import { GlassFilter } from "@/components/ui/liquid-glass-button"
@@ -14,6 +15,20 @@ import { FimCicloScreen } from "@/screens/fim-ciclo"
 import { PessoasScreen } from "@/screens/pessoas"
 import { LembretesScreen } from "@/screens/lembretes"
 import { PedidoScreen } from "@/screens/pedido"
+import { paginaVista } from "@/lib/pixels"
+
+/**
+ * Cada troca de tela conta como visualização de página nos pixels. Espera um instante
+ * para contar só a tela onde a pessoa parou, não os redirecionamentos (/ → /hoje → /entrar).
+ */
+function PaginaVista() {
+  const { pathname } = useLocation()
+  React.useEffect(() => {
+    const t = setTimeout(() => paginaVista(pathname), 400)
+    return () => clearTimeout(t)
+  }, [pathname])
+  return null
+}
 
 function Carregando() {
   return (
@@ -53,6 +68,7 @@ export default function App() {
     <AppProvider>
       <GlassFilter />
       <BrowserRouter>
+        <PaginaVista />
         <Routes>
           <Route path="/entrar" element={<SoDeslogado />} />
           <Route element={<Guardas precisaPerfis={false} />}>

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { api, ApiError, tokenStore, type AppState, type Pedido } from "@/lib/api"
+import { eventoCadastro, eventoLogin } from "@/lib/pixels"
 import type { Faixa, Tipo } from "@/content/protocolo"
 
 type NovoPerfil = { tipo: Tipo; nome: string; faixa_etaria: Faixa | null }
@@ -94,8 +95,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       tokenStore.set(r.access_token)
       setToken(r.access_token)
       setState(r.state)
+      eventoLogin()
     },
-    salvarPerfis: (perfis, moonDate) => comToken("save-profiles", { profiles: perfis, moon_date: moonDate }),
+    async salvarPerfis(perfis, moonDate) {
+      await comToken("save-profiles", { profiles: perfis, moon_date: moonDate })
+      eventoCadastro(perfis.length)
+    },
     novoCiclo: (profileId, moonDate) => comToken("new-run", { profile_id: profileId, moon_date: moonDate }),
     removerPerfil: (profileId) => comToken("remove-profile", { profile_id: profileId }),
     mudarLua: (runId, moonDate) => comToken("change-moon", { run_id: runId, moon_date: moonDate }),
